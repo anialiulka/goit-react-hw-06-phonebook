@@ -1,22 +1,19 @@
-import { useState, useEffect } from 'react';
-import { nanoid } from 'nanoid';
 import { Input } from './components/Input';
 import { Title } from './Title';
 import { Contacts } from './components/Contacts';
 import { Filter } from './components/FIlter';
 import { ContactElement } from 'components/ContactElement/ContactElement';
+import { addContactInfo, deleteContactInfo } from 'redux/contactsSlice';
+import { nanoid } from '@reduxjs/toolkit';
 
 import css from './App.module.css';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const App = () => {
-  const [contacts, setContacts] = useState(() => {
-    return JSON.parse(localStorage.getItem('contacts')) ?? [];
-  });
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
 
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
+  const dispatch = useDispatch();
 
   const addContact = data => {
     const nameRepeated = contacts.find(
@@ -29,11 +26,7 @@ export const App = () => {
       ...data,
       id: nanoid(),
     };
-    setContacts(prevState => [newContact, ...prevState]);
-  };
-
-  const handleChange = ({ target }) => {
-    setFilter(target.value);
+    dispatch(addContactInfo(newContact));
   };
 
   const getFilteredContacts = () => {
@@ -42,17 +35,14 @@ export const App = () => {
     );
   };
 
-  const deleteContact = id => {
-    const updatedContacts = contacts.filter(contact => contact.id !== id);
-    setContacts(updatedContacts);
-  };
+  const deleteContact = id => dispatch(deleteContactInfo(id));
 
   return (
     <div className={css.container}>
       <Title>Phonebook</Title>
       <Input addContact={addContact} />
       <Title>Contacts</Title>
-      <Filter handleChange={handleChange} filter={filter} />
+      <Filter />
       <Contacts>
         <ContactElement
           contacts={getFilteredContacts()}
