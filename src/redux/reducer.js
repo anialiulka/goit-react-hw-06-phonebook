@@ -1,5 +1,5 @@
-import { contactsReducer } from './contactsSlice';
-import { filterReducer } from './filterSlice';
+import { contactsReducer } from './contacts/slice';
+import { filterReducer } from './filter/slice';
 const { combineReducers } = require('redux');
 
 export const reducer = combineReducers({

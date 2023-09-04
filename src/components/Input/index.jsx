@@ -1,31 +1,33 @@
 import { useState } from 'react';
 import css from './Input.module.css';
-import PropTypes from 'prop-types';
+import { addContactInfo } from 'redux/contacts/slice';
+import { selectContacts } from 'redux/contacts/selectors';
+import { useDispatch, useSelector } from 'react-redux';
 
-export const Input = ({ addContact }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+export const Input = () => {
+  const contacts = useSelector(selectContacts);
+  const [form, setForm] = useState({ name: '', number: '' });
+  const dispatch = useDispatch();
+
+  const addContact = data => {
+    const nameRepeated = contacts.find(
+      contact => contact.name.toLowerCase() === data.name.toLowerCase()
+    );
+    if (nameRepeated) {
+      return alert(`${nameRepeated.name} is already in your contacts`);
+    }
+    dispatch(addContactInfo(data));
+  };
 
   const handleChange = ({ target }) => {
     const { name, value } = target;
-    switch (name) {
-      case 'name':
-        setName(value);
-        break;
-      case 'number':
-        setNumber(value);
-        break;
-
-      default:
-        return;
-    }
+    setForm(prevState => ({ ...prevState, [name]: value }));
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    addContact({ name: name, number: number });
-    setName('');
-    setNumber('');
+    addContact(form);
+    setForm({ name: '', number: '' });
   };
 
   return (
@@ -40,7 +42,7 @@ export const Input = ({ addContact }) => {
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
           required
           onChange={handleChange}
-          value={name}
+          value={form.name}
         />
       </label>
       <label htmlFor="number" className={css.label}>
@@ -53,7 +55,7 @@ export const Input = ({ addContact }) => {
           required
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           onChange={handleChange}
-          value={number}
+          value={form.number}
         />
       </label>
       <button type="submit" className={css.button}>
@@ -61,8 +63,4 @@ export const Input = ({ addContact }) => {
       </button>
     </form>
   );
-};
-
-Input.propTypes = {
-  addContact: PropTypes.func.isRequired,
 };
